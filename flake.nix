@@ -77,8 +77,8 @@
                 buildPhase = with pkgs; ''
                   export ANDROID_SDK_ROOT="${ANDROID_SDK_ROOT}"
                   export ANDROID_NDK_ROOT="${ANDROID_SDK_ROOT}/ndk-bundle";
-                  export PATH="${ANDROID_SDK_ROOT}/build-tools/${builtins.head sdkExtraArgs.buildToolsVersions}:$PATH"
-                  export GRADLE_OPTS="-Dorg.gradle.project.android.aapt2FromMavenOverride=${ANDROID_SDK_ROOT}/build-tools/${builtins.head sdkExtraArgs.buildToolsVersions}/aapt2"
+                  export PATH="${ANDROID_SDK_ROOT}/build-tools/${builtins.head sdkArgs.buildToolsVersions}:$PATH"
+                  export GRADLE_OPTS="-Dorg.gradle.project.android.aapt2FromMavenOverride=${ANDROID_SDK_ROOT}/build-tools/${builtins.head sdkArgs.buildToolsVersions}/aapt2"
                   export GRADLE_USER_HOME="$(mktemp -d)"
 
 
