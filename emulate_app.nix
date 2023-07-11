@@ -1,21 +1,18 @@
 {
   pkgs,
-  sdk,
-  sdkVersion,
+  defaultSdkArgs,
 }: {
   name ? "android-emulator",
   installed ? [],
   runPackage,
   runActivity,
   runFlags ? "",
-}:
-pkgs.stdenv.mkDerivation {
-  inherit name;
-
-  buildCommand = ''
-        mkdir -p $out/bin
-
-        cat > $out/bin/run-test-emulator << "EOF"
+  sdkArgs ? defaultSdkArgs,
+}: let
+  sdk = (pkgs.androidenv.composeAndroidPackages sdkArgs).androidsdk;
+in
+  pkgs.writeScriptBin "run-test-emulator"
+  ''
         #!${pkgs.runtimeShell} -e
 
         # We need a TMPDIR
@@ -57,24 +54,27 @@ pkgs.stdenv.mkDerivation {
 
         export ANDROID_SERIAL="emulator-$port"
 
+        ${sdk}/bin/sdkmanager --list
+
         # Create a virtual android device for testing if it does not exist
         ${sdk}/bin/avdmanager list target
 
         if [ "$(${sdk}/bin/avdmanager list avd | grep 'Name: device')" = "" ]
         then
+            echo "Creating a new device"
             # Create a virtual android device
             yes "" | ${sdk}/bin/avdmanager create avd --force -n device -k "system-images;android-${
-      builtins.head sdkVersion.platformVersions
+      builtins.head sdkArgs.platformVersions
     };${
-      builtins.head sdkVersion.systemImageType
+      builtins.head sdkArgs.systemImageTypes
     };${
-      builtins.head sdkVersion.abiVersions
+      builtins.head sdkArgs.abiVersions
     }" -p $ANDROID_AVD_HOME $NIX_ANDROID_AVD_FLAGS
 
         fi
 
         # Launch the emulator
-        echo "\nLaunch the emulator"
+        echo -e "\nLaunch the emulator"
         $ANDROID_SDK_ROOT/emulator/emulator -avd device -no-boot-anim -port $port $NIX_ANDROID_EMULATOR_FLAGS &
 
         # Wait until the device has completely booted
@@ -104,26 +104,22 @@ pkgs.stdenv.mkDerivation {
 
 
         ${
-      map (app: ''
-        if [ "$(${sdk}/libexec/android-sdk/platform-tools/adb -s emulator-$port shell pm list packages | grep package:${app.passthrough.packageName})" = "" ]
-        then
-            if [ -d "${app}" ]
-            then
-                appPath="$(echo ${app}/*.apk)"
-            else
-                appPath="${app}"
-            fi
+      builtins.concatStringsSep "\n" (map (app: ''
+          if [ "$(${sdk}/libexec/android-sdk/platform-tools/adb -s emulator-$port shell pm list packages | grep package:${app.passthru.packageName})" = "" ]
+          then
+              if [ -d "${app}" ]
+              then
+                  appPath="$(echo ${app}/*.apk)"
+              else
+                  appPath="${app}"
+              fi
 
-            ${sdk}/libexec/android-sdk/platform-tools/adb -s emulator-$port install "$appPath"
-        fi
-      '')
-      installed
+              ${sdk}/libexec/android-sdk/platform-tools/adb -s emulator-$port install "$appPath"
+          fi
+        '')
+        installed)
     }
 
         # Start the application
         ${sdk}/libexec/android-sdk/platform-tools/adb -s emulator-$port shell am start -a android.intent.action.MAIN -n ${runPackage}/${runActivity} ${runFlags}
-
-        EOF
-        chmod +x $out/bin/run-test-emulator
-  '';
-}
+  ''

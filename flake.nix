@@ -5,14 +5,18 @@
 
   inputs.repository.url = "https://maix.me/tachiyomi_gradle_repo.tar";
   inputs.repository.flake = false;
-  inputs.tachiyomi.url = "github:Maix0/tachiyomi-extensions";
-  inputs.tachiyomi.flake = false;
+  inputs.tachiyomi-extensions.url = "github:Maix0/tachiyomi-extensions";
+  inputs.tachiyomi-extensions.flake = false;
+  inputs.tachiyomi-apk.url = "https://github.com/tachiyomiorg/tachiyomi/releases/download/v0.14.6/tachiyomi-v0.14.6.apk";
+  inputs.tachiyomi-apk.flake = false;
+
   outputs = {
     self,
     nixpkgs,
     flake-utils,
     repository,
-    tachiyomi,
+    tachiyomi-extensions,
+    tachiyomi-apk,
   }:
     flake-utils.lib.eachDefaultSystem (
       system: let
@@ -23,6 +27,29 @@
             android_sdk.accept_license = true;
           };
         };
+        defaultSdkArgs =
+          {
+            buildToolsVersions = ["30.0.3"];
+            platformVersions = ["33"];
+            abiVersions = ["arm64-v8a"];
+            systemImageTypes = ["default"];
+            cmdLineToolsVersion = "8.0";
+          }
+          // {
+            includeEmulator = true;
+            includeSystemImages = true;
+            /*
+              includeExtras = [
+              "system-images;android-${
+                builtins.head defaultSdkArgs.platformVersions
+              };${
+                builtins.head defaultSdkArgs.systemImageTypes
+              };${
+                builtins.head defaultSdkArgs.abiVersions
+              }"
+            ];
+            */
+          };
 
         buildExtension = (
           {
@@ -30,13 +57,7 @@
             name,
             packageName,
             buildType ? "debug",
-            sdkArgs ? {
-              buildToolsVersions = ["30.0.3"];
-              platformVersions = ["33"];
-              abiVersions = ["x86_64"];
-              systemImageTypes = ["default"];
-              cmdLineToolsVersion = "8.0";
-            },
+            sdkArgs ? defaultSdkArgs,
           }
           : (
             let
@@ -66,7 +87,7 @@
             in
               pkgs.stdenv.mkDerivation {
                 inherit name;
-                src = tachiyomi;
+                src = tachiyomi-extensions;
                 buildInputs = with pkgs; [gradle sdk openjdk kotlin fastmod ripgrep];
                 unpackCmd = ''
                   cp -r $curSrc .
@@ -122,10 +143,24 @@
               }
           )
         );
-      in {
+      in rec {
         lib = {
+          defaultSdkArgs = defaultSdkArgs;
           buildExtension = buildExtension;
+          runEmulator = import ./emulate_app.nix {inherit pkgs defaultSdkArgs;};
         };
+        apps = {
+          enryu-extension = flake-utils.lib.mkApp {
+            drv = lib.runEmulator {
+              name = "enryu-emulator";
+              installed = [(tachiyomi-apk // {passthru.packageName = "eu.kanade.tachiyomi";}) packages.enryu-apk];
+              runPackage = "eu.kanade.tachiyomi";
+              runActivity = "eu.kanade.tachiyomi.ui.main.MainActivity";
+              runFlags = "-a eu.kanade.tachiyomi.SHOW_CATALOGUES";
+            };
+          };
+        };
+
         packages = {
           enryu-apk = buildExtension {
             gradleTask = "extensions:multisrc:en:enryumanga:assembleDebug";
