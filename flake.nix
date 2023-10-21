@@ -5,8 +5,8 @@
 
   inputs.repository.url = "https://maix.me/tachiyomi_gradle_repo.tar";
   inputs.repository.flake = false;
-  inputs.tachiyomi-extensions.url = "github:Maix0/tachiyomi-extensions";
-  inputs.tachiyomi-extensions.flake = false;
+  # inputs.tachiyomi-extensions.url = "github:Maix0/tachiyomi-extensions";
+  # inputs.tachiyomi-extensions.flake = false;
   inputs.tachiyomi-apk.url = "https://github.com/tachiyomiorg/tachiyomi/releases/download/v0.14.6/tachiyomi-v0.14.6.apk";
   inputs.tachiyomi-apk.flake = false;
 
@@ -15,11 +15,12 @@
     nixpkgs,
     flake-utils,
     repository,
-    tachiyomi-extensions,
+    # tachiyomi-extensions,
     tachiyomi-apk,
   }:
     flake-utils.lib.eachDefaultSystem (
       system: let
+        tachiyomi-extensions = ./src;
         pkgs = import nixpkgs {
           inherit system;
           config = {

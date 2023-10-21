@@ -1,0 +1,85 @@
+{
+  "nodes": {
+    "flake-utils": {
+      "inputs": {
+        "systems": "systems"
+      },
+      "locked": {
+        "lastModified": 1689068808,
+        "narHash": "sha256-6ixXo3wt24N/melDWjq70UuHQLxGV8jZvooRanIHXw0=",
+        "owner": "numtide",
+        "repo": "flake-utils",
+        "rev": "919d646de7be200f3bf08cb76ae1f09402b6f9b4",
+        "type": "github"
+      },
+      "original": {
+        "owner": "numtide",
+        "repo": "flake-utils",
+        "type": "github"
+      }
+    },
+    "nixpkgs": {
+      "locked": {
+        "lastModified": 1689047559,
+        "narHash": "sha256-s3xILs1+Hh4z8zudSnbOz5xM7ltzpg4WZ952ea7OlZ0=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "a187ec43efbeec0f3be6f9d13a6836fcbb914a9d",
+        "type": "github"
+      },
+      "original": {
+        "id": "nixpkgs",
+        "type": "indirect"
+      }
+    },
+    "repository": {
+      "flake": false,
+      "locked": {
+        "narHash": "sha256-/2SzoPh9p3yAPR5K1Nnn2ZAKnQUo2Av8sgk/72QFp2c=",
+        "type": "tarball",
+        "url": "https://maix.me/tachiyomi_gradle_repo.tar"
+      },
+      "original": {
+        "type": "tarball",
+        "url": "https://maix.me/tachiyomi_gradle_repo.tar"
+      }
+    },
+    "root": {
+      "inputs": {
+        "flake-utils": "flake-utils",
+        "nixpkgs": "nixpkgs",
+        "repository": "repository",
+        "tachiyomi-apk": "tachiyomi-apk"
+      }
+    },
+    "systems": {
+      "locked": {
+        "lastModified": 1681028828,
+        "narHash": "sha256-Vy1rq5AaRuLzOxct8nz4T6wlgyUR7zLU309k9mBC768=",
+        "owner": "nix-systems",
+        "repo": "default",
+        "rev": "da67096a3b9bf56a91d16901293e51ba5b49a27e",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nix-systems",
+        "repo": "default",
+        "type": "github"
+      }
+    },
+    "tachiyomi-apk": {
+      "flake": false,
+      "locked": {
+        "narHash": "sha256-ZqV4vcikLKXCtmj3YvpNUEwhGYKWV/kgFXLWAjk9gbk=",
+        "type": "file",
+        "url": "https://github.com/tachiyomiorg/tachiyomi/releases/download/v0.14.6/tachiyomi-v0.14.6.apk"
+      },
+      "original": {
+        "type": "file",
+        "url": "https://github.com/tachiyomiorg/tachiyomi/releases/download/v0.14.6/tachiyomi-v0.14.6.apk"
+      }
+    }
+  },
+  "root": "root",
+  "version": 7
+}
